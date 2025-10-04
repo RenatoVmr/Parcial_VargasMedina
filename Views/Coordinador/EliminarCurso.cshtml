@@ -1,0 +1,121 @@
+@model Curso
+@{
+    ViewData["Title"] = "Eliminar Curso";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-danger"><i class="fas fa-trash me-2"></i>Eliminar Curso</h2>
+    <a asp-action="Cursos" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver a Cursos
+    </a>
+</div>
+
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-info-circle me-2"></i>Información del Curso a Eliminar</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Código:</dt>
+                    <dd class="col-sm-9">@Model.Codigo</dd>
+                    
+                    <dt class="col-sm-3">Nombre:</dt>
+                    <dd class="col-sm-9">@Model.Nombre</dd>
+                    
+                    <dt class="col-sm-3">Créditos:</dt>
+                    <dd class="col-sm-9">@Model.Creditos</dd>
+                    
+                    <dt class="col-sm-3">Cupo:</dt>
+                    <dd class="col-sm-9">@Model.CupoMaximo</dd>
+                    
+                    <dt class="col-sm-3">Horario:</dt>
+                    <dd class="col-sm-9">@Model.HorarioInicio.ToString("HH:mm") - @Model.HorarioFin.ToString("HH:mm")</dd>
+                    
+                    <dt class="col-sm-3">Estado:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Activo)
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactivo</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <form asp-action="EliminarCurso" method="post">
+                <input asp-for="Id" type="hidden" />
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Cursos" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Confirmar Eliminación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        @if (Model.Matriculas?.Any() == true)
+        {
+            var matriculasActivas = Model.Matriculas.Where(m => m.Estado == EstadoMatricula.Confirmada || m.Estado == EstadoMatricula.Pendiente);
+            
+            @if (matriculasActivas.Any())
+            {
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Matrículas Activas</h6>
+                    <p>Este curso tiene <strong>@matriculasActivas.Count()</strong> matrículas activas.</p>
+                    <small class="text-muted">No se puede eliminar un curso con matrículas activas.</small>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Sin Matrículas Activas</h6>
+                    <p>Este curso no tiene matrículas activas y puede ser eliminado.</p>
+                </div>
+            }
+            
+            <div class="card">
+                <div class="card-header">
+                    <h6>Historial de Matrículas</h6>
+                </div>
+                <div class="card-body">
+                    @foreach (var matricula in Model.Matriculas.Take(5))
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <small>@matricula.Usuario.Email</small>
+                            <span class="badge bg-@(matricula.Estado == EstadoMatricula.Confirmada ? "success" : matricula.Estado == EstadoMatricula.Pendiente ? "warning" : "secondary")">
+                                @matricula.Estado
+                            </span>
+                        </div>
+                    }
+                    @if (Model.Matriculas.Count > 5)
+                    {
+                        <small class="text-muted">Y @(Model.Matriculas.Count - 5) más...</small>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle me-2"></i>Sin Matrículas</h6>
+                <p>Este curso no tiene matrículas registradas y puede ser eliminado con seguridad.</p>
+            </div>
+        }
+    </div>
+</div>

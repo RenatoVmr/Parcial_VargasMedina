@@ -1,0 +1,109 @@
+@model Curso
+@{
+    ViewData["Title"] = "Editar Curso";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-edit me-2"></i>Editar Curso</h2>
+    <a asp-action="Cursos" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver a Cursos
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="EditarCurso" method="post">
+                    <input asp-for="Id" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Codigo" class="form-label"></label>
+                                <input asp-for="Codigo" class="form-control" />
+                                <span asp-validation-for="Codigo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Creditos" class="form-label"></label>
+                                <input asp-for="Creditos" class="form-control" type="number" min="1" max="10" />
+                                <span asp-validation-for="Creditos" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="CupoMaximo" class="form-label"></label>
+                                <input asp-for="CupoMaximo" class="form-control" type="number" min="1" max="100" />
+                                <span asp-validation-for="CupoMaximo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="HorarioInicio" class="form-label"></label>
+                                <input asp-for="HorarioInicio" class="form-control" type="time" />
+                                <span asp-validation-for="HorarioInicio" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="HorarioFin" class="form-label"></label>
+                                <input asp-for="HorarioFin" class="form-control" type="time" />
+                                <span asp-validation-for="HorarioFin" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input asp-for="Activo" class="form-check-input" type="checkbox" />
+                        <label asp-for="Activo" class="form-check-label"></label>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Cursos" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle me-2"></i>Información del Curso</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> @Model.Id</p>
+                @if (Model.Matriculas?.Any() == true)
+                {
+                    var matriculados = Model.Matriculas.Count(m => m.Estado == EstadoMatricula.Confirmada);
+                    <p><strong>Matriculados:</strong> @matriculados/@Model.CupoMaximo</p>
+                    @if (matriculados > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <small><i class="fas fa-exclamation-triangle me-2"></i>Este curso tiene estudiantes matriculados.</small>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

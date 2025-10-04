@@ -1,0 +1,189 @@
+@model Curso
+@{
+    ViewData["Title"] = $"Detalle del Curso - {Model.Nombre}";
+}
+
+<div class="row">
+    <div class="col-12">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">@Model.Nombre</h4>
+                <span class="badge bg-primary fs-6">@Model.Codigo</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Información del Curso</h6>
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Código:</strong></td>
+                                    <td>@Model.Codigo</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Créditos:</strong></td>
+                                    <td>@Model.Creditos</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Horario:</strong></td>
+                                    <td>@Model.HorarioInicio.ToString("HH:mm") - @Model.HorarioFin.ToString("HH:mm")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cupo máximo:</strong></td>
+                                    <td>@Model.CupoMaximo estudiantes</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cupo disponible:</strong></td>
+                                    <td>
+                                        <span class="badge @(Model.CupoDisponible > 0 ? "bg-success" : "bg-danger")">
+                                            @Model.CupoDisponible/@Model.CupoMaximo
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Estadísticas de Matrícula</h6>
+                        @{
+                            var matriculasPendientes = Model.Matriculas.Count(m => m.Estado == EstadoMatricula.Pendiente);
+                            var matriculasConfirmadas = Model.Matriculas.Count(m => m.Estado == EstadoMatricula.Confirmada);
+                            var totalMatriculas = matriculasPendientes + matriculasConfirmadas;
+                        }
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Confirmadas</small>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" style="width: @((double)matriculasConfirmadas / Model.CupoMaximo * 100)%">
+                                    @matriculasConfirmadas
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Pendientes</small>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-warning" style="width: @((double)matriculasPendientes / Model.CupoMaximo * 100)%">
+                                    @matriculasPendientes
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (Model.CupoDisponible > 0)
+                    {
+                        <form asp-controller="Matriculas" asp-action="Inscribirse" method="post" style="display: inline;">
+                            <input type="hidden" name="cursoId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Inscribirse
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary" disabled>
+                            <i class="fas fa-times"></i> Sin cupo disponible
+                        </button>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-info-circle"></i> 
+                        Debes iniciar sesión para inscribirte en este curso.
+                    </p>
+                    <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-primary">
+                        Iniciar Sesión
+                    </a>
+                }
+                
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al catálogo
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        @if (Model.Matriculas.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Estudiantes Matriculados</h6>
+                </div>
+                <div class="card-body">
+                    @if (matriculasConfirmadas > 0)
+                    {
+                        <h6 class="text-success">Confirmados (@matriculasConfirmadas)</h6>
+                        <ul class="list-unstyled">
+                            @foreach (var matricula in Model.Matriculas.Where(m => m.Estado == EstadoMatricula.Confirmada).Take(5))
+                            {
+                                <li class="mb-1">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    @matricula.Usuario.UserName
+                                </li>
+                            }
+                        </ul>
+                        @if (matriculasConfirmadas > 5)
+                        {
+                            <small class="text-muted">... y @(matriculasConfirmadas - 5) más</small>
+                        }
+                    }
+                    
+                    @if (matriculasPendientes > 0)
+                    {
+                        <h6 class="text-warning mt-3">Pendientes (@matriculasPendientes)</h6>
+                        <ul class="list-unstyled">
+                            @foreach (var matricula in Model.Matriculas.Where(m => m.Estado == EstadoMatricula.Pendiente).Take(5))
+                            {
+                                <li class="mb-1">
+                                    <i class="fas fa-clock text-warning"></i>
+                                    @matricula.Usuario.UserName
+                                </li>
+                            }
+                        </ul>
+                        @if (matriculasPendientes > 5)
+                        {
+                            <small class="text-muted">... y @(matriculasPendientes - 5) más</small>
+                        }
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Aún no hay estudiantes matriculados</h6>
+                    <p class="small text-muted mb-0">¡Sé el primero en inscribirte!</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
