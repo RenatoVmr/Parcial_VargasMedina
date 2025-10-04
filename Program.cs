@@ -25,14 +25,29 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// Configurar sesiones
-builder.Services.AddDistributedMemoryCache();
+// Registrar servicios personalizados
+builder.Services.AddScoped<Parcial_VargasMedina.Services.ICursosCacheService, Parcial_VargasMedina.Services.CursosCacheService>();
+
+// Configurar Redis para sesiones y cache
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+});
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Para desarrollo local sin Redis, usar memoria cache como fallback
+if (builder.Environment.IsDevelopment() && redisConnectionString == "localhost:6379")
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 var app = builder.Build();
 

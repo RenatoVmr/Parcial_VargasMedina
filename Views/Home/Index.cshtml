@@ -1,4 +1,5 @@
-﻿@{
+﻿@model HomeViewModel
+@{
     ViewData["Title"] = "Portal Académico";
 }
 
@@ -83,21 +84,27 @@
     }
 </div>
 
-@{
-    var ultimoCursoSession = Context.Session.GetString("UltimoCurso");
-}
-
-@if (ultimoCursoSession != null)
+@if (Model.UltimoCursoVisitado != null)
 {
-    var ultimoCursoData = ultimoCursoSession.Split('|');
-    var ultimoCursoId = ultimoCursoData[0];
-    var ultimoCursoNombre = ultimoCursoData[1];
-    
     <div class="alert alert-info mt-4">
-        <i class="fas fa-bookmark"></i>
-        <strong>Último curso visitado:</strong> @ultimoCursoNombre
-        <a asp-controller="Cursos" asp-action="Detalle" asp-route-id="@ultimoCursoId" class="btn btn-sm btn-outline-info ms-2">
-            Volver al curso
-        </a>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-bookmark me-2"></i>
+                <strong>Último curso visitado:</strong> @Model.UltimoCursoVisitado.Nombre
+                <small class="text-muted">(@Model.UltimoCursoVisitado.Codigo)</small>
+            </div>
+            <div>
+                <a asp-controller="Cursos" asp-action="Detalle" asp-route-id="@Model.UltimoCursoVisitado.Id" 
+                   class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>Volver al curso
+                </a>
+            </div>
+        </div>
+        <div class="mt-2">
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>@Model.UltimoCursoVisitado.HorarioInicio.ToString("HH:mm") - @Model.UltimoCursoVisitado.HorarioFin.ToString("HH:mm") | 
+                <i class="fas fa-credit-card me-1"></i>@Model.UltimoCursoVisitado.Creditos créditos
+            </small>
+        </div>
     </div>
 }
