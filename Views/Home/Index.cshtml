@@ -1,8 +1,103 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Portal Académico";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+    <div class="container-fluid text-center">
+        <h1 class="display-4">Portal Académico</h1>
+        <p class="lead">Sistema de Gestión de Cursos y Matrículas</p>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <p class="mb-0">¡Bienvenido, @User.Identity.Name!</p>
+        }
+        else
+        {
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-light btn-lg">Iniciar Sesión</a>
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-light btn-lg">Registrarse</a>
+        }
+    </div>
 </div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Catálogo de Cursos</h5>
+                <p class="card-text">Explora nuestra oferta académica y encuentra el curso perfecto para ti.</p>
+                <a asp-controller="Cursos" asp-action="Index" class="btn btn-primary">Ver Cursos</a>
+            </div>
+        </div>
+    </div>
+    
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Mis Matrículas</h5>
+                    <p class="card-text">Consulta el estado de tus inscripciones y cursos matriculados.</p>
+                    <a href="#" class="btn btn-success">Ver Matrículas</a>
+                </div>
+            </div>
+        </div>
+        
+        @if (User.IsInRole("Coordinador"))
+        {
+            <div class="col-md-4">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-cogs fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Panel de Coordinador</h5>
+                        <p class="card-text">Administra cursos y gestiona las matrículas de estudiantes.</p>
+                        <a href="#" class="btn btn-warning">Ir al Panel</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-info-circle fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">¿Nuevo Usuario?</h5>
+                    <p class="card-text">Regístrate para acceder a todas las funcionalidades del portal.</p>
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-info">Crear Cuenta</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-secondary">
+                <div class="card-body text-center">
+                    <i class="fas fa-question-circle fa-3x text-secondary mb-3"></i>
+                    <h5 class="card-title">Ayuda</h5>
+                    <p class="card-text">¿Tienes dudas sobre el proceso de matrícula? Consulta nuestra guía.</p>
+                    <a href="#" class="btn btn-secondary">Ver Ayuda</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@{
+    var ultimoCursoSession = Context.Session.GetString("UltimoCurso");
+}
+
+@if (ultimoCursoSession != null)
+{
+    var ultimoCursoData = ultimoCursoSession.Split('|');
+    var ultimoCursoId = ultimoCursoData[0];
+    var ultimoCursoNombre = ultimoCursoData[1];
+    
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-bookmark"></i>
+        <strong>Último curso visitado:</strong> @ultimoCursoNombre
+        <a asp-controller="Cursos" asp-action="Detalle" asp-route-id="@ultimoCursoId" class="btn btn-sm btn-outline-info ms-2">
+            Volver al curso
+        </a>
+    </div>
+}
