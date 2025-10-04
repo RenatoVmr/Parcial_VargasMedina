@@ -73,6 +73,13 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
+// Configurar puerto para producción (Docker/Render)
+if (app.Environment.IsProduction())
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    app.Urls.Add($"http://0.0.0.0:{port}");
+}
+
 // Inicializar datos
 using (var scope = app.Services.CreateScope())
 {

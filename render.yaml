@@ -1,0 +1,34 @@
+version: 2
+build:
+  - name: portal-academico
+    env: docker
+    buildCommand: |
+      # Instalar .NET 8 SDK
+      curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
+      export PATH="$PATH:/opt/render/.dotnet"
+      
+      # Restaurar dependencias
+      dotnet restore
+      
+      # Publicar aplicación
+      dotnet publish -c Release -o ./publish
+    startCommand: |
+      export PATH="$PATH:/opt/render/.dotnet"
+      cd publish && dotnet Parcial_VargasMedina.dll
+services:
+  - type: web
+    name: portal-academico-web
+    env: docker
+    buildCommand: |
+      curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
+      export PATH="$PATH:/opt/render/.dotnet"
+      dotnet restore
+      dotnet publish -c Release -o ./publish
+    startCommand: |
+      export PATH="$PATH:/opt/render/.dotnet"
+      cd publish && dotnet Parcial_VargasMedina.dll --urls "http://0.0.0.0:$PORT"
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:$PORT

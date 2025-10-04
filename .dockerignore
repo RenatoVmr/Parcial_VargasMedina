@@ -1,0 +1,44 @@
+# Archivos y carpetas de .NET
+**/bin/
+**/obj/
+**/out/
+**/TestResults/
+
+# Archivos de desarrollo
+**/.vs/
+**/.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de Git
+.git/
+.gitignore
+.gitattributes
+
+# Archivos de documentación
+README.md
+*.md
+
+# Archivos de configuración local
+appsettings.Development.json
+*.log
+
+# Archivos de base de datos local
+*.db
+*.db-shm
+*.db-wal
+
+# Node modules (si existieran)
+node_modules/
+npm-debug.log
+
+# Archivos temporales
+*.tmp
+*.temp
