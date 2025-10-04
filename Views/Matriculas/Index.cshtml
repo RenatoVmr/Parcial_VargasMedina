@@ -1,0 +1,192 @@
+@model IEnumerable<Matricula>
+@{
+    ViewData["Title"] = "Mis Matrículas";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">@ViewData["Title"]</h1>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (Model.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-graduation-cap"></i>
+                        Historial de Matrículas
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Curso</th>
+                                    <th>Código</th>
+                                    <th>Créditos</th>
+                                    <th>Horario</th>
+                                    <th>Fecha Inscripción</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var matricula in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@matricula.Curso.Nombre</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@matricula.Curso.Codigo</span>
+                                        </td>
+                                        <td>@matricula.Curso.Creditos</td>
+                                        <td>
+                                            <small>@matricula.Curso.HorarioInicio.ToString("HH:mm") - @matricula.Curso.HorarioFin.ToString("HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            <small>@matricula.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            @switch (matricula.Estado)
+                                            {
+                                                case EstadoMatricula.Pendiente:
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-clock"></i> Pendiente
+                                                    </span>
+                                                    break;
+                                                case EstadoMatricula.Confirmada:
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Confirmada
+                                                    </span>
+                                                    break;
+                                                case EstadoMatricula.Cancelada:
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times"></i> Cancelada
+                                                    </span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-controller="Cursos" asp-action="Detalle" asp-route-id="@matricula.Curso.Id" 
+                                                   class="btn btn-outline-primary btn-sm" title="Ver curso">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @if (matricula.Estado == EstadoMatricula.Pendiente || matricula.Estado == EstadoMatricula.Confirmada)
+                                                {
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#cancelarModal" 
+                                                            data-matricula-id="@matricula.Id"
+                                                            data-curso-nombre="@matricula.Curso.Nombre"
+                                                            title="Cancelar matrícula">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                Total de matrículas: @Model.Count()
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                Activas: @Model.Count(m => m.Estado != EstadoMatricula.Cancelada) | 
+                                Canceladas: @Model.Count(m => m.Estado == EstadoMatricula.Cancelada)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-graduation-cap fa-4x text-muted"></i>
+                </div>
+                <h3 class="text-muted">No tienes matrículas registradas</h3>
+                <p class="text-muted mb-4">
+                    Explora nuestro catálogo de cursos y encuentra el perfecto para ti.
+                </p>
+                <a asp-controller="Cursos" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Explorar Cursos
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Cancelar -->
+<div class="modal fade" id="cancelarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancelar Matrícula</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea cancelar la matrícula en el curso <strong id="cursoNombre"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Atención:</strong> Esta acción no se puede deshacer.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener</button>
+                <form asp-action="Cancelar" method="post" style="display: inline;">
+                    <input type="hidden" id="matriculaId" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Sí, cancelar matrícula
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Configurar modal de cancelación
+        var cancelarModal = document.getElementById('cancelarModal');
+        cancelarModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var matriculaId = button.getAttribute('data-matricula-id');
+            var cursoNombre = button.getAttribute('data-curso-nombre');
+            
+            var modalMatriculaId = cancelarModal.querySelector('#matriculaId');
+            var modalCursoNombre = cancelarModal.querySelector('#cursoNombre');
+            
+            modalMatriculaId.value = matriculaId;
+            modalCursoNombre.textContent = cursoNombre;
+        });
+    </script>
+}

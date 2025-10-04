@@ -1,0 +1,164 @@
+@model CatalogoCursosViewModel
+@{
+    ViewData["Title"] = "Catálogo de Cursos";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">@ViewData["Title"]</h1>
+
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Filtros de búsqueda</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" asp-action="Index">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="Filtros.Nombre" class="form-label"></label>
+                                <input asp-for="Filtros.Nombre" class="form-control" placeholder="Ej: Programación, PROG001" />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label asp-for="Filtros.CreditosMin" class="form-label"></label>
+                                <input asp-for="Filtros.CreditosMin" type="number" class="form-control" min="1" />
+                                <span asp-validation-for="Filtros.CreditosMin" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label asp-for="Filtros.CreditosMax" class="form-label"></label>
+                                <input asp-for="Filtros.CreditosMax" type="number" class="form-control" min="1" />
+                                <span asp-validation-for="Filtros.CreditosMax" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label asp-for="Filtros.HorarioInicio" class="form-label"></label>
+                                <input asp-for="Filtros.HorarioInicio" type="time" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label asp-for="Filtros.HorarioFin" class="form-label"></label>
+                                <input asp-for="Filtros.HorarioFin" type="time" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">Buscar</button>
+                            <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Validación server-side para rango de créditos -->
+        @if (ViewData.ModelState.ContainsKey("CreditosRange"))
+        {
+            <div class="alert alert-danger">
+                Los créditos máximos deben ser mayores que los créditos mínimos.
+            </div>
+        }
+
+        <!-- Validación server-side para rango de horarios -->
+        @if (ViewData.ModelState.ContainsKey("HorarioRange"))
+        {
+            <div class="alert alert-danger">
+                El horario de fin debe ser posterior al horario de inicio.
+            </div>
+        }
+
+        <!-- Resultados -->
+        <div class="row">
+            <div class="col-12">
+                @if (Model.Cursos.Any())
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <p class="text-muted mb-0">Se encontraron @Model.Cursos.Count curso(s)</p>
+                        @if (ViewBag.FromCache == true)
+                        {
+                            <small class="badge bg-info">
+                                <i class="fas fa-bolt"></i> Datos desde cache (60s)
+                            </small>
+                        }
+                    </div>
+                    
+                    <div class="row">
+                        @foreach (var curso in Model.Cursos)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 fw-bold">@curso.Codigo</h6>
+                                        <span class="badge bg-primary">@curso.Creditos créditos</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">@curso.Nombre</h5>
+                                        <p class="card-text">
+                                            <strong>Horario:</strong> @curso.HorarioInicio.ToString("HH:mm") - @curso.HorarioFin.ToString("HH:mm")<br />
+                                            <strong>Cupo:</strong> @curso.CupoDisponible/@curso.CupoMaximo disponibles
+                                        </p>
+                                        
+                                        @if (curso.CupoDisponible > 0)
+                                        {
+                                            <span class="badge bg-success mb-2">Cupo disponible</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger mb-2">Sin cupo</span>
+                                        }
+                                    </div>
+                                    <div class="card-footer">
+                                        <a asp-action="Detalle" asp-route-id="@curso.Id" class="btn btn-outline-primary btn-sm">
+                                            Ver detalle
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <h4>No se encontraron cursos</h4>
+                        <p>No hay cursos que coincidan con los filtros seleccionados.</p>
+                        <a asp-action="Index" class="btn btn-primary">Ver todos los cursos</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Validación client-side adicional
+        $(document).ready(function() {
+            $('form').submit(function(e) {
+                var creditosMin = parseInt($('#Filtros_CreditosMin').val()) || 0;
+                var creditosMax = parseInt($('#Filtros_CreditosMax').val()) || 999;
+                
+                if (creditosMin > 0 && creditosMax > 0 && creditosMin > creditosMax) {
+                    e.preventDefault();
+                    alert('Los créditos máximos deben ser mayores que los créditos mínimos.');
+                    return false;
+                }
+                
+                var horarioInicio = $('#Filtros_HorarioInicio').val();
+                var horarioFin = $('#Filtros_HorarioFin').val();
+                
+                if (horarioInicio && horarioFin && horarioInicio >= horarioFin) {
+                    e.preventDefault();
+                    alert('El horario de fin debe ser posterior al horario de inicio.');
+                    return false;
+                }
+            });
+        });
+    </script>
+}
