@@ -23,7 +23,7 @@ namespace Parcial_VargasMedina.Data
             }
 
             // Crear usuario coordinador si no existe
-            var coordinadorEmail = "coordinador@universidad.edu";
+            var coordinadorEmail = "admin@portal.edu";
             var coordinador = await userManager.FindByEmailAsync(coordinadorEmail);
             
             if (coordinador == null)
@@ -35,7 +35,7 @@ namespace Parcial_VargasMedina.Data
                     EmailConfirmed = true
                 };
                 
-                await userManager.CreateAsync(coordinador, "Coordinador123!");
+                await userManager.CreateAsync(coordinador, "Admin123!");
                 await userManager.AddToRoleAsync(coordinador, "Coordinador");
             }
 
