@@ -3,56 +3,83 @@
     ViewData["Title"] = "Portal Académico";
 }
 
-<div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+<div class="jumbotron text-white rounded-4 p-5 mb-5 fade-in-up">
     <div class="container-fluid text-center">
-        <h1 class="display-4">Portal Académico</h1>
-        <p class="lead">Sistema de Gestión de Cursos y Matrículas</p>
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <p class="mb-0">¡Bienvenido, @User.Identity.Name!</p>
-        }
-        else
-        {
-            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-light btn-lg">Iniciar Sesión</a>
-            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-light btn-lg">Registrarse</a>
-        }
+        <div class="row align-items-center">
+            <div class="col-md-8 mx-auto">
+                <i class="fas fa-graduation-cap fa-4x mb-4 opacity-75"></i>
+                <h1 class="display-3 fw-bold mb-3">Portal Académico</h1>
+                <p class="lead fs-4 mb-4">Sistema Integral de Gestión de Cursos y Matrículas</p>
+                <p class="fs-6 mb-4 opacity-90">Plataforma moderna para la administración académica</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="alert alert-light d-inline-block">
+                        <i class="fas fa-user-circle me-2"></i>
+                        <strong>¡Bienvenido de vuelta, @User.Identity.Name!</strong>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-light btn-lg px-4 py-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-light btn-lg px-4 py-3">
+                            <i class="fas fa-user-plus me-2"></i>Registrarse
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card border-primary">
-            <div class="card-body text-center">
-                <i class="fas fa-book fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Catálogo de Cursos</h5>
-                <p class="card-text">Explora nuestra oferta académica y encuentra el curso perfecto para ti.</p>
-                <a asp-controller="Cursos" asp-action="Index" class="btn btn-primary">Ver Cursos</a>
+<div class="row g-4">
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 shadow-custom border-0 fade-in-up">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon bg-primary bg-gradient rounded-circle p-3 mb-4 mx-auto" style="width: 80px; height: 80px;">
+                    <i class="fas fa-book fa-2x text-white"></i>
+                </div>
+                <h5 class="card-title fw-bold mb-3">Catálogo de Cursos</h5>
+                <p class="card-text text-muted">Explora nuestra oferta académica completa con filtros avanzados y encuentra el curso perfecto para tu desarrollo profesional.</p>
+                <a asp-controller="Cursos" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>Explorar Cursos
+                </a>
             </div>
         </div>
     </div>
     
     @if (User.Identity?.IsAuthenticated == true)
     {
-        <div class="col-md-4">
-            <div class="card border-success">
-                <div class="card-body text-center">
-                    <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">Mis Matrículas</h5>
-                    <p class="card-text">Consulta el estado de tus inscripciones y cursos matriculados.</p>
-                    <a asp-controller="Matriculas" asp-action="Index" class="btn btn-success">Ver Matrículas</a>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-custom border-0 fade-in-up">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon bg-success bg-gradient rounded-circle p-3 mb-4 mx-auto" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user-graduate fa-2x text-white"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mb-3">Mis Matrículas</h5>
+                    <p class="card-text text-muted">Consulta el estado de tus inscripciones, revisa tus cursos matriculados y mantente al día con tu progreso académico.</p>
+                    <a asp-controller="Matriculas" asp-action="Index" class="btn btn-success btn-lg">
+                        <i class="fas fa-graduation-cap me-2"></i>Ver Matrículas
+                    </a>
                 </div>
             </div>
         </div>
         
         @if (User.IsInRole("Coordinador"))
         {
-            <div class="col-md-4">
-                <div class="card border-warning">
-                    <div class="card-body text-center">
-                        <i class="fas fa-cogs fa-3x text-warning mb-3"></i>
-                        <h5 class="card-title">Panel de Coordinador</h5>
-                        <p class="card-text">Administra cursos y gestiona las matrículas de estudiantes.</p>
-                        <a asp-controller="Coordinador" asp-action="Index" class="btn btn-warning">Ir al Panel</a>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-custom border-0 fade-in-up">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-warning bg-gradient rounded-circle p-3 mb-4 mx-auto" style="width: 80px; height: 80px;">
+                            <i class="fas fa-cogs fa-2x text-white"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Panel de Coordinador</h5>
+                        <p class="card-text text-muted">Administra cursos, gestiona matrículas de estudiantes y controla todos los aspectos del sistema académico.</p>
+                        <a asp-controller="Coordinador" asp-action="Index" class="btn btn-warning btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>Ir al Panel
+                        </a>
                     </div>
                 </div>
             </div>
